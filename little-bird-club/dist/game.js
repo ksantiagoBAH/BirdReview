@@ -5,6 +5,7 @@
  const neighbors=new Image(); neighbors.src='assets/bird-neighbors-flapping.png';
  const species=[{name:'Cardinal',points:30},{name:'Parakeet',points:20},{name:'Robin',points:25},{name:'Sparrow',points:15},{name:'Dove',points:20},{name:'Pigeon',points:25}];
  const keys=new Set(),W=800,H=500;
+ const keyboardControls=new Set(),pointerControls=new Map();
  const soundButton=document.querySelector('#game-sound');
  const powers={skeen:false,superman:false,guns:false};
  const timedPowers={guns:0,superman:0,skeen:0};
@@ -18,7 +19,7 @@
  document.querySelector('#game-code').addEventListener('submit',e=>{
   e.preventDefault();const code=codeInput.value.trim().toLowerCase();
   if(!Object.hasOwn(powers,code))return;
-  powers[code]=true;codeInput.value='';canvas.focus();
+  powers[code]=true;codeInput.value='';canvas.focus({preventScroll:true});
  });
  let audio,master,musicGain,musicSource,musicKind,musicOffset=0,musicStarted=0,muted=false,chirpAt=3;
  const tracks={level:{url:'assets/level-cruising-8bit.mp3'},boss:{url:'assets/boss-blood-ascendant.mp3'}};
@@ -71,7 +72,7 @@
   else if(event==='victory'){[392,523,659,784,1047].forEach((f,i)=>tone(f,f,.25,i*.12,'square',.3));hiss(0,.3)}
   else if(event==='over')[330,277,220,110].forEach((f,i)=>tone(f,f*.8,.3,i*.18,'triangle',.4));
  }
- soundButton.addEventListener('click',()=>{muted=!muted;soundButton.setAttribute('aria-pressed',String(!muted));soundButton.textContent=muted?'Sound off ♫':'Sound on ♪';if(state==='playing'){if(!muted)unlockAudio();volume(true)}else volume(false);canvas.focus()});
+ soundButton.addEventListener('click',()=>{muted=!muted;soundButton.setAttribute('aria-pressed',String(!muted));soundButton.textContent=muted?'Sound off ♫':'Sound on ♪';if(state==='playing'){if(!muted)unlockAudio();volume(true)}else volume(false);canvas.focus({preventScroll:true})});
  function formation(){
   birds=[];boss=null;
   if(wave%3===0){const round=wave/3,hp=28+(round-1)*8;boss={x:400,y:115,hp,maxHp:hp,phase:0,round,volley:0,splitCount:round+1,speed:1+(round-1)*.15,twinHp:22+(round-1)*6}}
@@ -83,13 +84,13 @@
  }
  function addScore(points){score+=points;if(score>best){best=score;try{localStorage.setItem('flock-best',String(best))}catch{}}hud()}
  function show(title,message,label){overlay.hidden=false;document.querySelector('#game-title').textContent=title;document.querySelector('#game-message').textContent=message;start.textContent=label;document.querySelector('#game-status').textContent=title+'. '+message}
- function begin(){if(!sprites.complete||!sprites.naturalWidth||!neighbors.complete||!neighbors.naturalWidth){document.querySelector('#game-message').textContent='The flock is still getting ready. Try again in a moment.';return}unlockAudio();if(state==='paused'){state='playing';volume(true);overlay.hidden=true;pause.textContent='Pause Ⅱ'}else{if(state!=='ready')Object.keys(powers).forEach(code=>powers[code]=false);Object.keys(timedPowers).forEach(code=>timedPowers[code]=0);defeatedCount=0;pickupIndex=0;updatePowerupHud();score=0;wave=1;lives=3;bossesCleared=0;continues=0;continueButton.hidden=true;player=400;playerY=465;shotAt=0;particles=[];formation();state='playing';volume(true);sound('wave');overlay.hidden=true;pause.disabled=false;hud()}canvas.focus()}
- function togglePause(){if(state==='playing'){state='paused';volume(false);keys.clear();show('BIRD BREAK.','Even chaos needs a little rest.','Resume the chaos →');pause.textContent='Resume ▶'}else if(state==='paused')begin()}
- function finish(){sound('over');state='over';syncMusic(false);keys.clear();pause.disabled=true;show('OUT-FLOCKED.',`You scored ${score} on wave ${wave}. The birds request a rematch.`,continues?'New run →':'One more flock →');continueButton.hidden=continues<1;continueButton.textContent=`Continue (${continues}) →`}
+ function begin(){if(!sprites.complete||!sprites.naturalWidth||!neighbors.complete||!neighbors.naturalWidth){document.querySelector('#game-message').textContent='The flock is still getting ready. Try again in a moment.';return}unlockAudio();if(state==='paused'){state='playing';volume(true);overlay.hidden=true;pause.textContent='Pause Ⅱ'}else{if(state!=='ready')Object.keys(powers).forEach(code=>powers[code]=false);Object.keys(timedPowers).forEach(code=>timedPowers[code]=0);defeatedCount=0;pickupIndex=0;updatePowerupHud();score=0;wave=1;lives=3;bossesCleared=0;continues=0;continueButton.hidden=true;player=400;playerY=465;shotAt=0;particles=[];formation();state='playing';volume(true);sound('wave');overlay.hidden=true;pause.disabled=false;hud()}canvas.focus({preventScroll:true})}
+ function togglePause(){if(state==='playing'){state='paused';volume(false);clearControls();show('BIRD BREAK.','Even chaos needs a little rest.','Resume the chaos →');pause.textContent='Resume ▶'}else if(state==='paused')begin()}
+ function finish(){sound('over');state='over';syncMusic(false);clearControls();pause.disabled=true;show('OUT-FLOCKED.',`You scored ${score} on wave ${wave}. The birds request a rematch.`,continues?'New run →':'One more flock →');continueButton.hidden=continues<1;continueButton.textContent=`Continue (${continues}) →`}
  function continueRun(){
   if(state!=='over'||continues<1)return;
-  continues--;lives=3;player=400;playerY=465;shotAt=0;particles=[];keys.clear();formation();state='playing';unlockAudio();volume(true);sound(boss?'boss':'wave');
-  overlay.hidden=true;continueButton.hidden=true;pause.disabled=false;pause.textContent='Pause Ⅱ';hud();canvas.focus();
+  continues--;lives=3;player=400;playerY=465;shotAt=0;particles=[];clearControls();formation();state='playing';unlockAudio();volume(true);sound(boss?'boss':'wave');
+  overlay.hidden=true;continueButton.hidden=true;pause.disabled=false;pause.textContent='Pause Ⅱ';hud();canvas.focus({preventScroll:true});
  }
  continueButton.addEventListener('click',continueRun);
  function updatePowerupHud(){
@@ -113,7 +114,7 @@
  function burst(x,y,color){for(let i=0;i<8;i++)particles.push({x,y,vx:(Math.random()-.5)*150,vy:(Math.random()-.5)*150,life:.4,color})}
  function updateParticles(dt){particles.forEach(p=>{p.x+=p.vx*dt;p.y+=p.vy*dt;p.life-=dt});particles=particles.filter(p=>p.life>0)}
  function bossTransition(kind,target){
-  boss.transition={kind,time:0,x:target.x,y:target.y};seeds=[];drops=[];keys.clear();
+  boss.transition={kind,time:0,x:target.x,y:target.y};seeds=[];drops=[];clearControls();
   for(let i=0;i<7;i++)burst(target.x+(Math.random()-.5)*90,target.y+(Math.random()-.5)*60,kind==='split'?'#ff85b5':'#ffdc58');
   sound(kind==='split'?'rage':'victory');
   document.querySelector('#game-encounter').textContent=kind==='split'?'NOT OVER YET · THE VULTURE IS SPLITTING':'BOSS CLEARED · THE SKY IS YOURS';
@@ -219,11 +220,28 @@
   for(const p of particles){ctx.fillStyle=p.color;ctx.fillRect(p.x,p.y,5,5)}
  }
  function frame(time){const dt=Math.min((time-previous)/1000,.04);previous=time;if(state==='playing')step(dt);draw(time);requestAnimationFrame(frame)}
+ function syncControls(){
+  keys.clear();for(const control of keyboardControls)keys.add(control);for(const controls of pointerControls.values())for(const control of controls)keys.add(control);
+  document.querySelectorAll('[data-control]').forEach(button=>button.classList.toggle('is-held',keys.has(button.dataset.control)));
+ }
+ function clearControls(){keyboardControls.clear();pointerControls.clear();syncControls()}
  const mapping={ArrowUp:'up',w:'up',W:'up',ArrowDown:'down',s:'down',S:'down',ArrowLeft:'left',a:'left',A:'left',ArrowRight:'right',d:'right',D:'right',' ':'fire'};
- canvas.addEventListener('keydown',e=>{if(mapping[e.key]){e.preventDefault();if(state==='playing')keys.add(mapping[e.key])}if(e.key.toLowerCase()==='p'){e.preventDefault();togglePause()}});
- window.addEventListener('keyup',e=>{if(mapping[e.key])keys.delete(mapping[e.key])});
- canvas.addEventListener('blur',()=>keys.clear());
- for(const b of document.querySelectorAll('[data-control]')){b.addEventListener('pointerdown',e=>{e.preventDefault();canvas.focus();if(state==='playing'){b.setPointerCapture(e.pointerId);keys.add(b.dataset.control)}});for(const name of ['pointerup','pointercancel','lostpointercapture'])b.addEventListener(name,()=>keys.delete(b.dataset.control))}
+ canvas.addEventListener('keydown',e=>{if(mapping[e.key]){e.preventDefault();if(state==='playing'){keyboardControls.add(mapping[e.key]);syncControls()}}if(e.key.toLowerCase()==='p'){e.preventDefault();togglePause()}});
+ window.addEventListener('keyup',e=>{if(mapping[e.key]){keyboardControls.delete(mapping[e.key]);syncControls()}});
+ canvas.addEventListener('blur',clearControls);window.addEventListener('blur',clearControls);
+ const directionPad=document.querySelector('.direction-pad');
+ function padControls(e){
+  const rect=directionPad.getBoundingClientRect(),dx=(e.clientX-rect.left)/rect.width-.5,dy=(e.clientY-rect.top)/rect.height-.5,controls=[];
+  if(Math.abs(dx)>.12&&Math.abs(dx)>=Math.abs(dy)*.55)controls.push(dx<0?'left':'right');
+  if(Math.abs(dy)>.12&&Math.abs(dy)>=Math.abs(dx)*.55)controls.push(dy<0?'up':'down');
+  return controls;
+ }
+ for(const target of [directionPad,...document.querySelectorAll('[data-control="fire"]')]){
+  target.addEventListener('pointerdown',e=>{e.preventDefault();if(state!=='playing')return;canvas.focus({preventScroll:true});target.setPointerCapture(e.pointerId);pointerControls.set(e.pointerId,target===directionPad?padControls(e):['fire']);syncControls()});
+  target.addEventListener('pointermove',e=>{if(target===directionPad&&pointerControls.has(e.pointerId)){pointerControls.set(e.pointerId,padControls(e));syncControls()}});
+  for(const event of ['pointerup','pointercancel','lostpointercapture'])target.addEventListener(event,e=>{pointerControls.delete(e.pointerId);syncControls()});
+  target.addEventListener('contextmenu',e=>e.preventDefault());
+ }
  document.addEventListener('visibilitychange',()=>{if(document.hidden&&state==='playing')togglePause()});
  start.addEventListener('click',begin);pause.addEventListener('click',togglePause);
  for(const img of [sprites,neighbors])img.addEventListener('error',()=>{document.querySelector('#game-message').textContent='The sprites could not load. Refresh to bring the flock back.'});
