@@ -1,0 +1,10 @@
+.DS_Store
+*.log
+*.tmp
+/.local-backups/
+/*.tar.gz
+/*-preview.png
+/*-preview.jpg
+/bird-*-prompt.txt
+
+/bird-gifs.zip
