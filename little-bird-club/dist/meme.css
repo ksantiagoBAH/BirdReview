@@ -19,6 +19,7 @@ h2{font-weight:800;letter-spacing:-1.8px}.collection{padding-top:75px}.filters b
 
 .pickup-guide{color:#c5b6d1;font:10px monospace;text-align:center;line-height:1.6;margin:12px 4px 0}.game-powerups{color:var(--amber);font:bold 12px monospace;text-align:center;line-height:1.6;margin:12px 4px 0}@media(max-width:740px){.pickup-guide{font-size:9px}.game-powerups{font-size:10px}}
 
+.game-screen,.game-controls{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 .game-controls{padding:12px 2px 4px;color:#ddd2ff}
 .game-utilities{display:flex;justify-content:flex-end;gap:8px;padding-bottom:8px;border-bottom:1px solid #40364e}
 .game-utilities button{border:1px solid #665582;background:#30283c;color:#fff9e9;border-radius:9px;min-height:40px;padding:8px 14px;font-size:12px;font-weight:700;touch-action:manipulation}
