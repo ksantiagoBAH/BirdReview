@@ -40,3 +40,5 @@ h2{font-weight:800;letter-spacing:-1.8px}.collection{padding-top:75px}.filters b
 
 @media(max-width:360px){.fire-controls{--fire-size:60px;grid-template-columns:60px;grid-template-rows:repeat(2,60px);gap:12px}.fire-a{grid-column:1;grid-row:2}.fire-b{grid-column:1;grid-row:1}}
 @media(pointer:coarse){.keyboard-hint{display:none}}
+
+.game-difficulty{display:flex;align-items:center;justify-content:center;gap:10px;color:#ddd2ff;font:11px monospace;margin:0 0 14px}.game-difficulty select{padding:8px 12px;border:1px solid #b1a0c5;border-radius:5px;background:#393044;color:#fff9e9;font:inherit}.game-difficulty select:disabled{opacity:.65}
