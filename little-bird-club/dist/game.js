@@ -44,6 +44,7 @@
  const powers={skeen:false,superman:false,guns:false};
  const timedPowers={guns:0,superman:0,skeen:0};
  const pickupTypes=['guns','superman','skeen'];
+ const pickupCycle=['guns','skeen','guns','skeen','superman'];
  const pickupLabels={guns:'RAPID FIRE',superman:'SHIELD',skeen:'ESCORTS'};
  const pickupColors={guns:'#ffdc58',superman:'#86e7ff',skeen:'#baeb72'};
  const hasPower=code=>powers[code]||timedPowers[code]>0;
@@ -109,7 +110,7 @@
  soundButton.addEventListener('click',()=>{muted=!muted;soundButton.setAttribute('aria-pressed',String(!muted));soundButton.textContent=muted?'Sound off ♫':'Sound on ♪';if(state==='playing'){if(!muted)unlockAudio();volume(true)}else volume(false);canvas.focus({preventScroll:true})});
  function formation(){
   birds=[];boss=null;
-  if(wave%3===0){const round=Math.ceil(wave/6),kind=wave%6===0?'seagull':'vulture',hp=kind==='seagull'?80+(round-1)*20:28+(round-1)*8;boss={kind,gapIndex:11,burstCount:0,aimAt:1.6,aimTarget:null,x:400,y:115,hp,maxHp:hp,phase:0,round,volley:0,splitCount:round+1,speed:1+(round-1)*.15,twinHp:22+(round-1)*6}}
+  if(wave%3===0){const round=Math.ceil(wave/6),kind=wave%6===0?'seagull':'vulture',hp=kind==='seagull'?120+(round-1)*30:28+(round-1)*8;boss={kind,gapIndex:11,burstCount:0,aimAt:1.6,aimTarget:null,x:400,y:115,hp,maxHp:hp,phase:0,round,volley:0,splitCount:round+1,speed:1+(round-1)*.15,twinHp:22+(round-1)*6}}
   else for(let r=0;r<3;r++)for(let c=0;c<8;c++)birds.push({x:115+c*78,y:65+r*65,type:wave===1?[0,2,3][r]:wave===2?[1,4,5][r]:(wave+r)%species.length});
   seeds=[];drops=[];pickupAt=10;direction=1;dropAt=boss?1.8:1;invincible=1.5;chirpAt=3;
   if(state==='playing'){syncMusic(true);if(wave===1||wave%3!==1)sound(boss?'boss':'wave')}
@@ -133,7 +134,7 @@
   if(element.textContent!==display)element.textContent=display;
   element.hidden=!display;
  }
- function spawnPickup(x,y){pickups.push({x:Math.max(24,Math.min(W-24,x)),y,type:pickupTypes[pickupIndex++%pickupTypes.length]})}
+ function spawnPickup(x,y){pickups.push({x:Math.max(24,Math.min(W-24,x)),y,type:pickupCycle[pickupIndex++%pickupCycle.length]})}
  function updatePickups(dt){
   for(const type of pickupTypes)timedPowers[type]=Math.max(0,timedPowers[type]-dt);
   for(const pickup of pickups){
