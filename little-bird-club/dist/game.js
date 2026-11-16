@@ -3,6 +3,7 @@
  const overlay=document.querySelector('#game-overlay'),start=document.querySelector('#game-start'),pause=document.querySelector('#game-pause');
  const sprites=new Image(); sprites.src='assets/bird-sprites.png';
  const neighbors=new Image(); neighbors.src='assets/bird-neighbors-flapping.png';
+ const ships=new Image(); ships.src='assets/player-ships.png';
  const species=[{name:'Cardinal',points:30},{name:'Parakeet',points:20},{name:'Robin',points:25},{name:'Sparrow',points:15},{name:'Dove',points:20},{name:'Pigeon',points:25}];
  const keys=new Set(),W=800,H=500;
  const keyboardControls=new Set(),pointerControls=new Map();
@@ -84,7 +85,7 @@
  }
  function addScore(points){score+=points;if(score>best){best=score;try{localStorage.setItem('flock-best',String(best))}catch{}}hud()}
  function show(title,message,label){overlay.hidden=false;document.querySelector('#game-title').textContent=title;document.querySelector('#game-message').textContent=message;start.textContent=label;document.querySelector('#game-status').textContent=title+'. '+message}
- function begin(){if(!sprites.complete||!sprites.naturalWidth||!neighbors.complete||!neighbors.naturalWidth){document.querySelector('#game-message').textContent='The flock is still getting ready. Try again in a moment.';return}unlockAudio();if(state==='paused'){state='playing';volume(true);overlay.hidden=true;pause.textContent='Pause Ⅱ'}else{if(state!=='ready')Object.keys(powers).forEach(code=>powers[code]=false);Object.keys(timedPowers).forEach(code=>timedPowers[code]=0);defeatedCount=0;pickupIndex=0;pickups=[];updatePowerupHud();score=0;wave=1;lives=3;bossesCleared=0;continues=0;continueButton.hidden=true;player=400;playerY=465;shotAt=0;particles=[];formation();state='playing';volume(true);sound('wave');overlay.hidden=true;pause.disabled=false;hud()}canvas.focus({preventScroll:true})}
+ function begin(){if(!sprites.complete||!sprites.naturalWidth||!neighbors.complete||!neighbors.naturalWidth||!ships.complete||!ships.naturalWidth){document.querySelector('#game-message').textContent='The flock is still getting ready. Try again in a moment.';return}unlockAudio();if(state==='paused'){state='playing';volume(true);overlay.hidden=true;pause.textContent='Pause Ⅱ'}else{if(state!=='ready')Object.keys(powers).forEach(code=>powers[code]=false);Object.keys(timedPowers).forEach(code=>timedPowers[code]=0);defeatedCount=0;pickupIndex=0;pickups=[];updatePowerupHud();score=0;wave=1;lives=3;bossesCleared=0;continues=0;continueButton.hidden=true;player=400;playerY=465;shotAt=0;particles=[];formation();state='playing';volume(true);sound('wave');overlay.hidden=true;pause.disabled=false;hud()}canvas.focus({preventScroll:true})}
  function togglePause(){if(state==='playing'){state='paused';volume(false);clearControls();show('BIRD BREAK.','Even chaos needs a little rest.','Resume the chaos →');pause.textContent='Resume ▶'}else if(state==='paused')begin()}
  function finish(){sound('over');state='over';syncMusic(false);clearControls();pause.disabled=true;show('OUT-FLOCKED.',`You scored ${score} on wave ${wave}. The birds request a rematch.`,continues?'New run →':'One more flock →');continueButton.hidden=continues<1;continueButton.textContent=`Continue (${continues}) →`}
  function continueRun(){
@@ -214,7 +215,7 @@
   if(hasPower('superman')||invincible<=0||Math.floor(time/100)%2){
    for(const offset of hasPower('skeen')?[-72,-42,0,42,72]:[0]){
     ctx.save();ctx.translate(player+offset,playerY);const scale=offset===0?1:.55;ctx.scale(scale,scale);
-    ctx.fillStyle=offset===0?'#baeb72':'#86e7ff';ctx.fillRect(-20,-5,40,15);ctx.fillRect(-13,-12,26,7);ctx.fillStyle='#ffdc58';ctx.fillRect(-4,-24,8,14);ctx.fillStyle='#6750cc';ctx.fillRect(-13,10,8,6);ctx.fillRect(5,10,8,6);ctx.restore();
+    if(ships.complete&&ships.naturalWidth)ctx.drawImage(ships,Math.floor(time/120)%2*96,offset===0?0:96,96,96,-24,-24,48,48);ctx.restore();
    }
   }
   for(const p of particles){ctx.fillStyle=p.color;ctx.fillRect(p.x,p.y,5,5)}
@@ -247,6 +248,6 @@
  }
  document.addEventListener('visibilitychange',()=>{if(document.hidden&&state==='playing')togglePause()});
  start.addEventListener('click',begin);pause.addEventListener('click',togglePause);
- for(const img of [sprites,neighbors])img.addEventListener('error',()=>{document.querySelector('#game-message').textContent='The sprites could not load. Refresh to bring the flock back.'});
+ for(const img of [sprites,neighbors,ships])img.addEventListener('error',()=>{document.querySelector('#game-message').textContent='The sprites could not load. Refresh to bring the flock back.'});
  formation();hud();requestAnimationFrame(frame);
 })();
